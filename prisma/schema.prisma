@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int               @id @default(autoincrement())
+  email        String            @unique
+  username     String
+  passwordHash String
+  joinDate     DateTime
+  ratings      LevelRating[]
+  completions  LevelCompletion[]
+}
+
+model Level {
+  id              Int               @id @default(autoincrement())
+  title           String
+  description     String?
+  private         Boolean
+  dateCreated     DateTime
+  dateUpdated     DateTime
+  tiles           LevelTile[]
+  characters      LevelCharacter[]
+  pickups         LevelPickup[]
+  goalPositionX   Int
+  goalPositionY   Int
+  playerPositionX Int
+  playerPositionY Int
+  ratings         LevelRating[]
+  completions     LevelCompletion[]
+}
+
+model LevelRating {
+  id      Int   @id @default(autoincrement())
+  user    User  @relation(fields: [userId], references: [id])
+  userId  Int
+  level   Level @relation(fields: [levelId], references: [id])
+  levelId Int
+  value   Int
+}
+
+model LevelCompletion {
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int
+  level         Level    @relation(fields: [levelId], references: [id])
+  levelId       Int
+  dateCompleted DateTime
+  gameDuration  Int
+}
+
+model LevelTile {
+  id        Int    @id @default(autoincrement())
+  positionX Int
+  positionY Int
+  type      String
+  level     Level  @relation(fields: [levelId], references: [id])
+  levelId   Int
+}
+
+model LevelPickup {
+  id        Int    @id @default(autoincrement())
+  positionX Int
+  positionY Int
+  type      String
+  level     Level  @relation(fields: [levelId], references: [id])
+  levelId   Int
+}
+
+model LevelCharacter {
+  id        Int    @id @default(autoincrement())
+  positionX Int
+  positionY Int
+  type      String
+  level     Level  @relation(fields: [levelId], references: [id])
+  levelId   Int
+}
