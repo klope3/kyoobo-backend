@@ -3,13 +3,13 @@ import { prisma } from "./client";
 import { testLevels, testUsers } from "./seedData";
 
 async function eraseDb() {
-  await prisma.level.deleteMany();
-  await prisma.user.deleteMany();
   await prisma.levelCharacter.deleteMany();
-  await prisma.levelCompletion.deleteMany();
   await prisma.levelPickup.deleteMany();
   await prisma.levelRating.deleteMany();
   await prisma.levelTile.deleteMany();
+  await prisma.levelCompletion.deleteMany();
+  await prisma.level.deleteMany();
+  await prisma.user.deleteMany();
 }
 
 async function seedDb() {
@@ -27,6 +27,7 @@ async function seedDb() {
         playerPositionY: level.playerPositionY,
         private: level.private,
         title: level.title,
+        description: level.description,
       },
     });
     createdLevels.push(newLevel);
