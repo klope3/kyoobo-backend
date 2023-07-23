@@ -61,7 +61,13 @@ app.post(
         .send("There was a server error.");
     }
 
-    res.status(OK).send(token);
+    res
+      .status(OK)
+      .send({
+        token,
+        username: userWithEmail.username,
+        email: userWithEmail.email,
+      });
   }
 );
 
@@ -112,7 +118,11 @@ app.post(
         .send(message("There was a server error."));
     }
 
-    return res.status(OK).send(token);
+    return res.status(OK).send({
+      token,
+      username: createdUser.username,
+      email: createdUser.email,
+    });
   }
 );
 
