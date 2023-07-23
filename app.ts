@@ -14,12 +14,13 @@ import {
 import { message } from "./utility";
 import { createUserToken, hashPassword } from "./authUtils";
 import bcrypt from "bcrypt";
+import { User } from "@prisma/client";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-//TODO:log in
+//login
 app.post(
   "/login",
   validateRequest({
@@ -64,7 +65,7 @@ app.post(
   }
 );
 
-//TODO:create account
+//create account
 app.post(
   "/users",
   validateRequest({
@@ -115,7 +116,37 @@ app.post(
   }
 );
 
-//TODO:get level by id
+//get user info by id
+app.get(
+  "/users/:userId",
+  validateRequest({ params: z.object({ userId: intParseableString }) }),
+  async (req, res) => {
+    const userWithId = await prisma.user.findUnique({
+      where: {
+        id: +req.params.userId,
+      },
+    });
+
+    if (!userWithId) {
+      return res
+        .status(NOT_FOUND)
+        .send(message("User " + req.params.userId + " not found."));
+    }
+
+    type UserWithoutPassword = Omit<User, "passwordHash">;
+
+    const userInfo: UserWithoutPassword = {
+      email: userWithId.email,
+      id: userWithId.id,
+      joinDate: userWithId.joinDate,
+      username: userWithId.username,
+    };
+
+    return res.status(OK).send(userInfo);
+  }
+);
+
+//get level by id
 app.get(
   "/levels/:levelId",
   validateRequest({
