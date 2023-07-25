@@ -113,7 +113,7 @@ type OtherLevelData = {
   characters: OtherLevelDataBase[];
   pickups: OtherLevelDataBase[];
 }
-export const testLevels: (Omit<Level, "id"> & OtherLevelData)[] = [
+export const testLevels: (Omit<Level, "id" | "userId"> & OtherLevelData)[] = [
   {
     title: "My Cool Level",
     description: "This is a test level.",

@@ -15,6 +15,18 @@ async function eraseDb() {
 async function seedDb() {
   const createdLevels: Level[] = [];
   const createdUsers: User[] = [];
+  //create users
+  for (const user of testUsers) {
+    const newUser = await prisma.user.create({
+      data: {
+        email: user.email,
+        joinDate: user.joinDate,
+        passwordHash: user.passwordHash,
+        username: user.username,
+      },
+    });
+    createdUsers.push(newUser);
+  }
   //create levels with tiles, characters, and pickups
   for (const level of testLevels) {
     const newLevel = await prisma.level.create({
@@ -28,6 +40,7 @@ async function seedDb() {
         private: level.private,
         title: level.title,
         description: level.description,
+        userId: createdUsers[0].id,
       },
     });
     createdLevels.push(newLevel);
@@ -61,18 +74,6 @@ async function seedDb() {
         },
       });
     }
-  }
-  //create users
-  for (const user of testUsers) {
-    const newUser = await prisma.user.create({
-      data: {
-        email: user.email,
-        joinDate: user.joinDate,
-        passwordHash: user.passwordHash,
-        username: user.username,
-      },
-    });
-    createdUsers.push(newUser);
   }
   //create ratings
   const ratings: Omit<LevelRating, "id">[] = [

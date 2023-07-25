@@ -18,6 +18,7 @@ model User {
   joinDate     DateTime
   ratings      LevelRating[]
   completions  LevelCompletion[]
+  levels       Level[]
 }
 
 model Level {
@@ -36,6 +37,8 @@ model Level {
   playerPositionY Int
   ratings         LevelRating[]
   completions     LevelCompletion[]
+  user            User              @relation(fields: [userId], references: [id])
+  userId          Int
 }
 
 model LevelRating {

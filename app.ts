@@ -61,13 +61,11 @@ app.post(
         .send("There was a server error.");
     }
 
-    res
-      .status(OK)
-      .send({
-        token,
-        username: userWithEmail.username,
-        email: userWithEmail.email,
-      });
+    res.status(OK).send({
+      token,
+      username: userWithEmail.username,
+      email: userWithEmail.email,
+    });
   }
 );
 
@@ -181,6 +179,41 @@ app.get(
     res.status(OK).send(level);
   }
 );
+
+//get levels
+//TODO: allow searching, pagination, filtering, etc.
+app.get("/levels", async (req, res) => {
+  const levels = await prisma.level.findMany({
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+      completions: true,
+      ratings: true,
+    },
+  });
+
+  const levelsWithCalculations = levels.map((level) => {
+    const totalRatings = level.ratings.length;
+    const ratingSum = level.ratings.reduce(
+      (accum, item) => item.value + accum,
+      0
+    );
+    const { completions, ratings, ...levelWithoutCompletionsAndRatings } =
+      level;
+
+    return {
+      averageRating: totalRatings > 0 ? ratingSum / totalRatings : 0,
+      totalRatings,
+      totalCompletions: completions.length,
+      ...levelWithoutCompletionsAndRatings,
+    };
+  });
+
+  res.status(OK).send(levelsWithCalculations);
+});
 
 //TODO:get completions for level
 
