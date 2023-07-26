@@ -168,6 +168,11 @@ app.get(
         id: +req.params.levelId,
       },
       include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
         characters: true,
         tiles: true,
         pickups: true,
@@ -228,5 +233,7 @@ app.get("/levels", async (req, res) => {
 //TODO:post level rating
 
 //TODO:delete level rating
+
+//TODO:update level rating
 
 app.listen(3000);
