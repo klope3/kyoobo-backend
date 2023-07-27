@@ -5,6 +5,7 @@ import { z } from "zod";
 import { intParseableString } from "./validations";
 import { prisma } from "./client";
 import {
+  BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
   NOT_AUTHENTICATED,
   NOT_FOUND,
@@ -12,7 +13,7 @@ import {
   RESOURCE_CONFLICT,
 } from "./statusCodes";
 import { message } from "./utility";
-import { createUserToken, hashPassword } from "./authUtils";
+import { createUserToken, hashPassword, tryVerifyUser } from "./authUtils";
 import bcrypt from "bcrypt";
 import { User } from "@prisma/client";
 
@@ -229,6 +230,58 @@ app.get("/levels", async (req, res) => {
 //TODO:get all ratings for specific user
 
 //TODO:post level completion
+app.post(
+  "/levels/completions",
+  validateRequest({
+    body: z.object({
+      userId: z.number().int(),
+      levelId: z.number().int(),
+      completionTime: z.number().int(),
+    }),
+  }),
+  async (req, res) => {
+    const { completionTime, levelId, userId } = req.body;
+
+    const levelWithId = await prisma.level.findUnique({
+      where: {
+        id: levelId,
+      },
+    });
+
+    if (!levelWithId) {
+      return res
+        .status(NOT_FOUND)
+        .send(message("No level found with that id."));
+    }
+
+    if (completionTime <= 0) {
+      return res
+        .status(BAD_REQUEST)
+        .send(message("Completion time must be greater than zero."));
+    }
+
+    const verifyUserResult = await tryVerifyUser(
+      userId,
+      req.headers.authorization
+    );
+    if (verifyUserResult.error) {
+      return res
+        .status(verifyUserResult.status)
+        .send(message(verifyUserResult.error));
+    }
+
+    const createdCompletion = await prisma.levelCompletion.create({
+      data: {
+        dateCompleted: new Date(),
+        gameDuration: completionTime,
+        userId,
+        levelId,
+      },
+    });
+
+    res.status(OK).send(createdCompletion);
+  }
+);
 
 //TODO:post level rating
 
