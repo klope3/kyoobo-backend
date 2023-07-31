@@ -1,22 +1,25 @@
 import {User, Level, LevelCharacter, LevelPickup, LevelTile} from "@prisma/client"
 import { hashPassword } from "./authUtils";
 
-export const testUsers: Omit<User, "id">[] = [
+export const testUsers: (Omit<User, "id" | "passwordHash"> & {password: string})[] = [
   {
     email: "bob.jones@site.com",
-    passwordHash: hashPassword("lollipop"),
+    // passwordHash: hashPassword("lollipop"),
+    password: "lollipop",
     joinDate: new Date(1687388726395),
     username: "bobbo"
   },
   {
     email: "sally.jones@web.com",
-    passwordHash: hashPassword("catsRock"),
+    // passwordHash: hashPassword("catsRock"),
+    password: "catsRock",
     joinDate: new Date(1685388726395),
     username: "sallyRocks"
   },
   {
     email: "john.doe@gmail.com",
-    passwordHash: hashPassword("password1234"),
+    // passwordHash: hashPassword("password1234"),
+    password: "password1234",
     joinDate: new Date(1685488726395),
     username: "hashtag_john"
   }

@@ -1,6 +1,7 @@
 import { Level, User, LevelRating, LevelCompletion } from "@prisma/client";
 import { prisma } from "./client";
 import { testLevels, testUsers } from "./seedData";
+import { hashPassword } from "./authUtils";
 
 async function eraseDb() {
   await prisma.levelCharacter.deleteMany();
@@ -21,7 +22,7 @@ async function seedDb() {
       data: {
         email: user.email,
         joinDate: user.joinDate,
-        passwordHash: user.passwordHash,
+        passwordHash: hashPassword(user.password),
         username: user.username,
       },
     });
