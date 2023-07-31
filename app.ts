@@ -15,7 +15,7 @@ import {
 import { message } from "./utility";
 import { createUserToken, hashPassword, tryVerifyUser } from "./authUtils";
 import bcrypt from "bcrypt";
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 const app = express();
 app.use(express.json());
@@ -126,6 +126,7 @@ app.post(
 );
 
 //get user info by id
+//TODO: If this EVER returns sensitive user info, it will require authorization
 app.get(
   "/users/:userId",
   validateRequest({ params: z.object({ userId: intParseableString }) }),
@@ -229,6 +230,43 @@ app.get("/levels", async (req, res) => {
 
 //TODO:get all ratings for specific user
 
+//TODO:get specific user's rating for specific level
+app.get(
+  "/users/:userId/ratings/:levelId",
+  validateRequest({
+    params: z.object({
+      userId: intParseableString,
+      levelId: intParseableString,
+    }),
+  }),
+  async (req, res) => {
+    const { userId, levelId } = req.params;
+
+    const { error, status } = await tryVerifyUser(
+      +userId,
+      req.headers.authorization
+    );
+    if (error) {
+      return res.status(status).send(message(error));
+    }
+
+    const ratingWithUserAndLevelId = await prisma.levelRating.findFirst({
+      where: {
+        levelId: +levelId,
+        userId: +userId,
+      },
+    });
+
+    if (!ratingWithUserAndLevelId) {
+      return res
+        .status(NOT_FOUND)
+        .send(message("No user with that id has rated a level with that id."));
+    }
+
+    return res.status(OK).send(ratingWithUserAndLevelId);
+  }
+);
+
 //TODO:post level completion
 app.post(
   "/levels/completions",
@@ -270,6 +308,7 @@ app.post(
         .send(message(verifyUserResult.error));
     }
 
+    //TODO: include an "isFastest" property in the response to indicate if this is the user's personal best
     const createdCompletion = await prisma.levelCompletion.create({
       data: {
         dateCompleted: new Date(),
@@ -284,9 +323,165 @@ app.post(
 );
 
 //TODO:post level rating
+app.post(
+  "/ratings",
+  validateRequest({
+    body: z.object({
+      userId: z.number().int(),
+      levelId: z.number().int(),
+      value: z.number().int().min(0).max(10),
+    }),
+  }),
+  async (req, res) => {
+    const { levelId, userId, value } = req.body;
+    const levelWithId = await prisma.level.findUnique({
+      where: {
+        id: levelId,
+      },
+    });
+    if (!levelWithId) {
+      return res.status(NOT_FOUND).send(message("No level with that id."));
+    }
+
+    const userWithId = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!userWithId) {
+      return res.status(NOT_FOUND).send(message("No user with that id."));
+    }
+
+    const verifyUserResult = await tryVerifyUser(
+      userId,
+      req.headers.authorization
+    );
+    if (verifyUserResult.error) {
+      return res
+        .status(verifyUserResult.status)
+        .send(message(verifyUserResult.error));
+    }
+
+    const ratingWithUserAndLevelId = await prisma.levelRating.findFirst({
+      where: {
+        userId,
+        levelId,
+      },
+    });
+
+    if (ratingWithUserAndLevelId) {
+      return res
+        .status(RESOURCE_CONFLICT)
+        .send(
+          message(
+            "That user has already rated that level. Use the PUT endpoint instead."
+          )
+        );
+    }
+
+    const createdRating = await prisma.levelRating.create({
+      data: {
+        value,
+        levelId,
+        userId,
+      },
+    });
+
+    return res.status(OK).send(createdRating);
+  }
+);
 
 //TODO:delete level rating
+app.delete(
+  "/users/:userId/ratings/:levelId",
+  validateRequest({
+    params: z.object({
+      userId: intParseableString,
+      levelId: intParseableString,
+    }),
+  }),
+  async (req, res) => {
+    const { userId, levelId } = req.params;
+    const ratingWithUserAndLevelId = await prisma.levelRating.findFirst({
+      where: {
+        userId: +userId,
+        levelId: +levelId,
+      },
+    });
+    if (!ratingWithUserAndLevelId) {
+      return res
+        .status(NOT_FOUND)
+        .send(message("No user with that id has rated a level with that id."));
+    }
+    //TODO: The above section of code (and probably others) is repeated in other endpoint(s). Should probably make one function in a dbUtils.ts.
+    const { error, status } = await tryVerifyUser(
+      +userId,
+      req.headers.authorization
+    );
+    if (error) {
+      return res.status(status).send(message(error));
+    }
+
+    const deletedRating = await prisma.levelRating.delete({
+      where: {
+        id: ratingWithUserAndLevelId.id,
+      },
+    });
+    return res.status(OK).send(deletedRating);
+  }
+);
 
 //TODO:update level rating
+app.put(
+  "/users/:userId/ratings/:levelId",
+  validateRequest({
+    params: z.object({
+      userId: intParseableString,
+      levelId: intParseableString,
+    }),
+    body: z.object({
+      value: z.number().int().min(0).max(10),
+    }),
+  }),
+  async (req, res) => {
+    const { userId, levelId } = req.params;
+    const { value: newValue } = req.body;
+    const ratingWithUserAndLevelId = await prisma.levelRating.findFirst({
+      where: {
+        userId: +userId,
+        levelId: +levelId,
+      },
+    });
+    if (!ratingWithUserAndLevelId) {
+      return res
+        .status(NOT_FOUND)
+        .send(
+          message(
+            "No user with that id has rated a level with that id. If you want to create a new rating, use the POST endpoint."
+          )
+        );
+    }
+
+    const { error, status } = await tryVerifyUser(
+      +userId,
+      req.headers.authorization
+    );
+    if (error) {
+      res.status(status).send(message(error));
+    }
+
+    const updatedRating = await prisma.levelRating.update({
+      where: {
+        id: ratingWithUserAndLevelId.id,
+      },
+      data: {
+        ...ratingWithUserAndLevelId,
+        value: newValue,
+      },
+    });
+
+    return res.status(OK).send(updatedRating);
+  }
+);
 
 app.listen(3000);
