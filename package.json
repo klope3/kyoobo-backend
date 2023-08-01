@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx jest",
+    "test": "npx jest -i",
     "seed": "npx ts-node seed.ts",
     "server": "npx nodemon app.ts"
   },

@@ -55,7 +55,7 @@ export async function tryVerifyUser(
 
   if (!split || split.length < 2) {
     return {
-      error: "Bad token.",
+      error: "Bad token. Incorrect formatting.",
       status: BAD_REQUEST,
     };
   }
@@ -80,7 +80,7 @@ export async function tryVerifyUser(
     }
   } catch (error) {
     return {
-      error: "Bad token.",
+      error: "Bad token. Couldn't parse a userId from the payload.",
       status: BAD_REQUEST,
     };
   }

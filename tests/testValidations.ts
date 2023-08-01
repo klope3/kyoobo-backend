@@ -16,3 +16,22 @@ export function validateGetUserJson(json: any) {
   });
   return schema.safeParse(json).success;
 }
+
+export function validateCreateAccountJson(json: any) {
+  const schema = z.strictObject({
+    email: z.string(),
+    username: z.string(),
+    token: z.string(),
+  });
+  return schema.safeParse(json).success;
+}
+
+export function validateGetRatingJson(json: any) {
+  const schema = z.strictObject({
+    id: z.number(),
+    userId: z.number(),
+    levelId: z.number(),
+    value: z.number(),
+  });
+  return schema.safeParse(json).success;
+}
