@@ -8,33 +8,30 @@ import {
   RESOURCE_CONFLICT,
 } from "../../statusCodes";
 import {
+  FixturesCommon,
   createAccountResponse,
   fetchUserResponse,
+  getCommonFixtures,
   loginResponse,
   requestOptionsGet,
+  seedTimeout,
   url,
 } from "../testUtils";
 import {
   validateCreateAccountJson,
   validateGetUserJson,
+  validateLoginJson,
 } from "../testValidations";
-const timeout = 15000;
-
-async function getUserFixture() {
-  const seedData = await seedDb();
-  if (!seedData) throw new Error("Failed to seed before a test");
-  return seedData.createdTestUsers[0];
-}
 
 describe("GET /users/:userId", () => {
-  let testUser: TestUser;
+  let fixtures: FixturesCommon;
 
   beforeEach(async () => {
-    testUser = await getUserFixture();
-  }, timeout);
+    fixtures = await getCommonFixtures();
+  }, seedTimeout);
 
   it("should return JSON with id, username, email, and joinDate", async () => {
-    // const testUser = await getTestUserData();
+    const { testUser } = fixtures;
     const response = await fetchUserResponse(testUser.id);
     expect(response.status).toBe(OK);
 
@@ -53,32 +50,39 @@ describe("GET /users/:userId", () => {
   });
 });
 
-//note: the normal behavior for this endpoint has already been tested by getting the auth token above
 describe("POST /login", () => {
-  let testUser: TestUser;
+  let fixtures: FixturesCommon;
 
   beforeEach(async () => {
-    testUser = await getUserFixture();
-  }, timeout);
+    fixtures = await getCommonFixtures();
+  }, seedTimeout);
+
+  it("should return a JSON with username, email, and token", async () => {
+    const { testUser } = fixtures;
+    const response = await loginResponse(testUser.email, testUser.password);
+    expect(response.status).toBe(OK);
+    const json = await response.json();
+    expect(validateLoginJson(json)).toBe(true);
+  });
 
   it("should return NOT AUTHENTICATED when email isn't found in db", async () => {
-    // const testUser = await getTestUserData();
+    const { testUser } = fixtures;
     const response = await loginResponse("badEmail", testUser.password);
     expect(response.status).toBe(NOT_AUTHENTICATED);
   });
   it("should return NOT AUTHENTICATED when password is wrong", async () => {
-    // const testUser = await getTestUserData();
+    const { testUser } = fixtures;
     const response = await loginResponse(testUser.email, "blah");
     expect(response.status).toBe(NOT_AUTHENTICATED);
   });
 });
 
 describe("POST /users", () => {
-  let testUser: TestUser;
+  let fixtures: FixturesCommon;
 
   beforeEach(async () => {
-    testUser = await getUserFixture();
-  }, timeout);
+    fixtures = await getCommonFixtures();
+  }, seedTimeout);
 
   it(
     "should return JSON with token, username, and email when successful",
@@ -92,11 +96,12 @@ describe("POST /users", () => {
       const json = await response.json();
       expect(validateCreateAccountJson(json)).toBe(true);
     },
-    timeout
+    seedTimeout
   );
   it(
     "should return RESOURCE CONFLICT when duplicate username/email is used",
     async () => {
+      const { testUser } = fixtures;
       const response = await createAccountResponse(
         testUser.email,
         testUser.username,
@@ -104,6 +109,6 @@ describe("POST /users", () => {
       );
       expect(response.status).toBe(RESOURCE_CONFLICT);
     },
-    timeout
+    seedTimeout
   );
 });
