@@ -1,0 +1,3 @@
+[submodule "platformer-creator-game-shared"]
+	path = platformer-creator-game-shared
+	url = https://github.com/klope3/platformer-creator-game-shared.git
