@@ -249,9 +249,3 @@ describe("PUT /users/:userId/ratings/:levelId", () => {
     expect(response.status).toBe(BAD_REQUEST);
   });
 });
-
-//user not found
-//level not found
-//token not given
-//token/user mismatch
-//good response, good shape

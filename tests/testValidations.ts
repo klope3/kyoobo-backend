@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { dateParseableString } from "../platformer-creator-game-shared/typesFetched";
 
 export function parseTokenJson(json: any) {
   const schema = z.object({
@@ -70,4 +71,13 @@ export function validateLevelResultsJson(json: any) {
   return schema.safeParse(json).success;
 }
 
-export function validateLevelDataJson(json: any) {}
+export function validateLevelCompletionJson(json: any) {
+  const schema = z.object({
+    id: z.number(),
+    userId: z.number(),
+    levelId: z.number(),
+    dateCompleted: dateParseableString,
+    gameDuration: z.number(),
+  });
+  return schema.safeParse(json).success;
+}

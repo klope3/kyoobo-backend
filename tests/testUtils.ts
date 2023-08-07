@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { TestUser, seedDb } from "../seedLogic";
-import { Level } from "@prisma/client";
+// import { FetchedLevelResult, Level } from "../platformer-creator-game-shared/types";
+import { Level as PrismaLevel } from "@prisma/client";
 
 export const url = process.env.SERVER_URL;
 if (!url) throw new Error("No server url!");
@@ -13,7 +14,7 @@ export const seedTimeout = 15000;
 
 export type FixturesCommon = {
   testUser: TestUser;
-  testLevel: Level;
+  testLevel: PrismaLevel;
 };
 
 export async function getCommonFixtures(): Promise<FixturesCommon> {
@@ -142,7 +143,10 @@ export function updateRatingResponse(
 }
 
 export function getLevelResponse(id?: number) {
-  return fetch(`${url}/levels${id ? id : ""}`, requestOptionsGet);
+  return fetch(
+    `${url}/levels${id !== undefined ? `/${id}` : ""}`,
+    requestOptionsGet
+  );
 }
 
 export function postLevelCompletionResponse(

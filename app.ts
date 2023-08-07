@@ -467,7 +467,7 @@ app.put(
       req.headers.authorization
     );
     if (error) {
-      res.status(status).send(message(error));
+      return res.status(status).send(message(error));
     }
 
     const updatedRating = await prisma.levelRating.update({

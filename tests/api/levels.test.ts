@@ -1,11 +1,16 @@
-import { OK } from "../../statusCodes";
+import { fetchedLevelDataSchema } from "../../platformer-creator-game-shared/typesFetched";
+import { BAD_REQUEST, FORBIDDEN, NOT_FOUND, OK } from "../../statusCodes";
 import {
   FixturesCommon,
   getCommonFixtures,
   getLevelResponse,
+  postLevelCompletionResponse,
   seedTimeout,
 } from "../testUtils";
-import { validateLevelResultsJson } from "../testValidations";
+import {
+  validateLevelCompletionJson,
+  validateLevelResultsJson,
+} from "../testValidations";
 
 describe("GET /levels", () => {
   let fixtures: FixturesCommon;
@@ -29,5 +34,81 @@ describe("GET /levels/:levelId", () => {
     fixtures = await getCommonFixtures();
   }, seedTimeout);
 
-  //TODO: We need to parse the level data for building a full level. This data is complex and relies on complex TypeScript types. Find a way to easily share these between repos.
+  it("should return JSON with all the data for building and running a game level", async () => {
+    const response = await getLevelResponse(fixtures.testLevel.id);
+    expect(response.status).toBe(OK);
+    const json = await response.json();
+    expect(fetchedLevelDataSchema.safeParse(json).success).toBe(true);
+  });
+
+  it("should return NOT FOUND when the level is not found", async () => {
+    const response = await getLevelResponse(0);
+    expect(response.status).toBe(NOT_FOUND);
+  });
+});
+
+describe("POST /levels/completions", () => {
+  let fixtures: FixturesCommon;
+  const time = 12345;
+
+  beforeEach(async () => {
+    fixtures = await getCommonFixtures();
+  }, seedTimeout);
+
+  it("should return properly formed JSON when the post is successful", async () => {
+    const { testLevel, testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      testUser.id,
+      testLevel.id,
+      testUser.token,
+      time
+    );
+    expect(response.status).toBe(OK);
+    const json = await response.json();
+    expect(validateLevelCompletionJson(json)).toBe(true);
+  });
+
+  it("should return NOT FOUND when the user is not found", async () => {
+    const { testLevel, testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      0,
+      testLevel.id,
+      testUser.token,
+      time
+    );
+    expect(response.status).toBe(NOT_FOUND);
+  });
+
+  it("should return NOT FOUND when the level is not found", async () => {
+    const { testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      testUser.id,
+      0,
+      testUser.token,
+      time
+    );
+    expect(response.status).toBe(NOT_FOUND);
+  });
+
+  it("should return BAD REQUEST when the token is not given", async () => {
+    const { testLevel, testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      testUser.id,
+      testLevel.id,
+      "",
+      time
+    );
+    expect(response.status).toBe(BAD_REQUEST);
+  });
+
+  it("should return FORBIDDEN when the user and token don't match", async () => {
+    const { testLevel, testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      testUser.id + 1,
+      testLevel.id,
+      testUser.token,
+      time
+    );
+    expect(response.status).toBe(FORBIDDEN);
+  });
 });
