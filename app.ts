@@ -12,7 +12,7 @@ import {
   OK,
   RESOURCE_CONFLICT,
 } from "./statusCodes";
-import { message } from "./utility";
+import { addCalculationsToLevel, message } from "./utility";
 import { createUserToken, hashPassword, tryVerifyUser } from "./authUtils";
 import bcrypt from "bcrypt";
 import { Prisma, User } from "@prisma/client";
@@ -178,12 +178,15 @@ app.get(
         characters: true,
         tiles: true,
         pickups: true,
+        completions: true,
+        ratings: true,
       },
     });
     if (!level) {
       return res.status(NOT_FOUND).send(message("Level not found."));
     }
-    res.status(OK).send(level);
+    const levelWithCalculations = addCalculationsToLevel(level);
+    res.status(OK).send(levelWithCalculations);
   }
 );
 
@@ -202,22 +205,7 @@ app.get("/levels", async (req, res) => {
     },
   });
 
-  const levelsWithCalculations = levels.map((level) => {
-    const totalRatings = level.ratings.length;
-    const ratingSum = level.ratings.reduce(
-      (accum, item) => item.value + accum,
-      0
-    );
-    const { completions, ratings, ...levelWithoutCompletionsAndRatings } =
-      level;
-
-    return {
-      averageRating: totalRatings > 0 ? ratingSum / totalRatings : 0,
-      totalRatings,
-      totalCompletions: completions.length,
-      ...levelWithoutCompletionsAndRatings,
-    };
-  });
+  const levelsWithCalculations = levels.map(addCalculationsToLevel);
 
   res.status(OK).send(levelsWithCalculations);
 });
