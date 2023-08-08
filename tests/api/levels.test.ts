@@ -1,4 +1,3 @@
-import { fetchedLevelDataSchema } from "../../platformer-creator-game-shared/typesFetched";
 import { BAD_REQUEST, FORBIDDEN, NOT_FOUND, OK } from "../../statusCodes";
 import {
   FixturesCommon,
@@ -9,6 +8,7 @@ import {
 } from "../testUtils";
 import {
   validateLevelCompletionJson,
+  validateLevelDataJson,
   validateLevelResultsJson,
 } from "../testValidations";
 
@@ -38,7 +38,7 @@ describe("GET /levels/:levelId", () => {
     const response = await getLevelResponse(fixtures.testLevel.id);
     expect(response.status).toBe(OK);
     const json = await response.json();
-    expect(fetchedLevelDataSchema.safeParse(json).success).toBe(true);
+    expect(validateLevelDataJson(json)).toBe(true);
   });
 
   it("should return NOT FOUND when the level is not found", async () => {
@@ -111,4 +111,21 @@ describe("POST /levels/completions", () => {
     );
     expect(response.status).toBe(FORBIDDEN);
   });
+
+  it("should return BAD REQUEST when the completion time is negative", async () => {
+    const { testLevel, testUser } = fixtures;
+    const response = await postLevelCompletionResponse(
+      testUser.id,
+      testLevel.id,
+      testUser.token,
+      -100
+    );
+    expect(response.status).toBe(BAD_REQUEST);
+  });
 });
+
+//user not found
+//level not found
+//token not given
+//token/user mismatch
+//good response, good shape

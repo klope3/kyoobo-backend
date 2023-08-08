@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { dateParseableString } from "../platformer-creator-game-shared/typesFetched";
+import {
+  fetchedLevelDataSchema,
+  fetchedLevelResultSchema,
+  levelCompletionSchema,
+  ratingSchema,
+  userSchema,
+} from "../platformer-creator-game-shared/typesFetched";
 
 export function parseTokenJson(json: any) {
   const schema = z.object({
@@ -8,7 +14,7 @@ export function parseTokenJson(json: any) {
   return schema.parse(json);
 }
 
-export function validateLoginJson(json: any) {
+export function validateAuthJson(json: any) {
   const schema = z.strictObject({
     email: z.string(),
     username: z.string(),
@@ -18,66 +24,26 @@ export function validateLoginJson(json: any) {
 }
 
 export function validateGetUserJson(json: any) {
-  const schema = z.strictObject({
-    email: z.string(),
-    id: z.number(),
-    joinDate: z.string(),
-    username: z.string(),
-  });
-  return schema.safeParse(json).success;
+  return userSchema.safeParse(json).success;
 }
 
 export function validateCreateAccountJson(json: any) {
-  const schema = z.strictObject({
-    email: z.string(),
-    username: z.string(),
-    token: z.string(),
-  });
-  return schema.safeParse(json).success;
+  return validateAuthJson(json);
 }
 
 export function validateRatingJson(json: any) {
-  const schema = z.strictObject({
-    id: z.number(),
-    userId: z.number(),
-    levelId: z.number(),
-    value: z.number(),
-  });
-  return schema.safeParse(json).success;
+  return ratingSchema.safeParse(json).success;
 }
 
 export function validateLevelResultsJson(json: any) {
-  const dateParseableString = z
-    .string()
-    .refine((str) => !isNaN(new Date(str).getTime()));
-
-  const schema = z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string(),
-      private: z.boolean(),
-      dateCreated: dateParseableString,
-      dateUpdated: dateParseableString,
-      userId: z.number(),
-      user: z.object({
-        username: z.string(),
-      }),
-      averageRating: z.number(),
-      totalRatings: z.number(),
-      totalCompletions: z.number(),
-    })
-  );
+  const schema = z.array(fetchedLevelResultSchema);
   return schema.safeParse(json).success;
 }
 
+export function validateLevelDataJson(json: any) {
+  return fetchedLevelDataSchema.safeParse(json).success;
+}
+
 export function validateLevelCompletionJson(json: any) {
-  const schema = z.object({
-    id: z.number(),
-    userId: z.number(),
-    levelId: z.number(),
-    dateCompleted: dateParseableString,
-    gameDuration: z.number(),
-  });
-  return schema.safeParse(json).success;
+  return levelCompletionSchema.safeParse(json).success;
 }

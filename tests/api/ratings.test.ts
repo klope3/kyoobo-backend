@@ -1,5 +1,10 @@
-import { Level } from "@prisma/client";
-import { TestUser, seedDb } from "../../seedLogic";
+import {
+  BAD_REQUEST,
+  FORBIDDEN,
+  NOT_FOUND,
+  OK,
+  RESOURCE_CONFLICT,
+} from "../../statusCodes";
 import {
   FixturesCommon,
   deleteRatingResponse,
@@ -10,14 +15,6 @@ import {
   updateRatingResponse,
 } from "../testUtils";
 import { validateRatingJson } from "../testValidations";
-import {
-  BAD_REQUEST,
-  FORBIDDEN,
-  NOT_FOUND,
-  OK,
-  RESOURCE_CONFLICT,
-} from "../../statusCodes";
-import { ZodError } from "zod";
 
 describe("GET /users/:userId/ratings/:levelId (rating for specific user and specific level", () => {
   let fixtures: FixturesCommon;
@@ -215,23 +212,11 @@ describe("PUT /users/:userId/ratings/:levelId", () => {
     expect(json.value).toBe(newValue);
   });
 
-  it("should return a NOT FOUND when the level is not found", async () => {
-    const { testUser, testLevel } = fixtures;
+  it("should return a NOT FOUND when there is no such rating to update (no rating entry with the given userId and levelId)", async () => {
+    const { testUser } = fixtures;
     const response = await updateRatingResponse(
       testUser.id,
       0,
-      testUser.token,
-      5
-    );
-    const json = await response.json();
-    expect(response.status).toBe(NOT_FOUND);
-  });
-
-  it("should return a NOT FOUND when the user is not found", async () => {
-    const { testUser, testLevel } = fixtures;
-    const response = await updateRatingResponse(
-      0,
-      testLevel.id,
       testUser.token,
       5
     );
@@ -247,5 +232,16 @@ describe("PUT /users/:userId/ratings/:levelId", () => {
       4
     );
     expect(response.status).toBe(BAD_REQUEST);
+  });
+
+  it("should return a FORBIDDEN when the user doesn't match the token", async () => {
+    const { testUser, testLevel } = fixtures;
+    const response = await updateRatingResponse(
+      testUser.id + 1,
+      testLevel.id,
+      testUser.token,
+      4
+    );
+    expect(response.status).toBe(FORBIDDEN);
   });
 });

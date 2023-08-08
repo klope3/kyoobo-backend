@@ -1,5 +1,3 @@
-// import { testUsers } from "../../seedData";
-import { TestUser, seedDb } from "../../seedLogic";
 import {
   BAD_REQUEST,
   NOT_AUTHENTICATED,
@@ -18,9 +16,9 @@ import {
   url,
 } from "../testUtils";
 import {
+  validateAuthJson,
   validateCreateAccountJson,
   validateGetUserJson,
-  validateLoginJson,
 } from "../testValidations";
 
 describe("GET /users/:userId", () => {
@@ -62,7 +60,7 @@ describe("POST /login", () => {
     const response = await loginResponse(testUser.email, testUser.password);
     expect(response.status).toBe(OK);
     const json = await response.json();
-    expect(validateLoginJson(json)).toBe(true);
+    expect(validateAuthJson(json)).toBe(true);
   });
 
   it("should return NOT AUTHENTICATED when email isn't found in db", async () => {
