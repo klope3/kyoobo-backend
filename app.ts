@@ -126,7 +126,6 @@ app.post(
 );
 
 //get user info by id
-//TODO: If this EVER returns sensitive user info, it will require authorization
 app.get(
   "/users/:userId",
   validateRequest({ params: z.object({ userId: intParseableString }) }),
@@ -190,8 +189,6 @@ app.get(
   }
 );
 
-//get levels
-//TODO: allow searching, pagination, filtering, etc.
 app.get("/levels", async (req, res) => {
   const levels = await prisma.level.findMany({
     include: {
@@ -210,15 +207,44 @@ app.get("/levels", async (req, res) => {
   res.status(OK).send(levelsWithCalculations);
 });
 
-//TODO:get completions for level
+//get completions for level
+app.get(
+  "/levels/:levelId/completions",
+  validateRequest({
+    params: z.object({
+      levelId: intParseableString,
+    }),
+  }),
+  async (req, res) => {
+    const levelId = +req.params.levelId;
+    const level = await prisma.level.findUnique({
+      where: {
+        id: levelId,
+      },
+    });
+    if (!level) {
+      return res
+        .status(NOT_FOUND)
+        .send(message("No level with that id was found."));
+    }
+    const completionsForLevel = await prisma.levelCompletion.findMany({
+      where: {
+        levelId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+    return res.status(OK).send(completionsForLevel);
+  }
+);
 
-//TODO:get completions for specific user
-
-//TODO:get ratings for level
-
-//TODO:get all ratings for specific user
-
-//TODO:get specific user's rating for specific level
+//get specific user's rating for specific level
 app.get(
   "/users/:userId/ratings/:levelId",
   validateRequest({
@@ -255,7 +281,7 @@ app.get(
   }
 );
 
-//TODO:post level completion
+//post level completion
 app.post(
   "/levels/completions",
   validateRequest({
@@ -296,7 +322,6 @@ app.post(
         .send(message(verifyUserResult.error));
     }
 
-    //TODO: include an "isFastest" property in the response to indicate if this is the user's personal best
     const createdCompletion = await prisma.levelCompletion.create({
       data: {
         dateCompleted: new Date(),
@@ -304,13 +329,21 @@ app.post(
         userId,
         levelId,
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
     });
 
     res.status(OK).send(createdCompletion);
   }
 );
 
-//TODO:post level rating
+//post level rating
 app.post(
   "/ratings",
   validateRequest({
@@ -379,7 +412,7 @@ app.post(
   }
 );
 
-//TODO:delete level rating
+//delete level rating
 app.delete(
   "/users/:userId/ratings/:levelId",
   validateRequest({
@@ -401,7 +434,6 @@ app.delete(
         .status(NOT_FOUND)
         .send(message("No user with that id has rated a level with that id."));
     }
-    //TODO: The above section of code (and probably others) is repeated in other endpoint(s). Should probably make one function in a dbUtils.ts.
     const { error, status } = await tryVerifyUser(
       +userId,
       req.headers.authorization
@@ -419,7 +451,7 @@ app.delete(
   }
 );
 
-//TODO:update level rating
+//update level rating
 app.put(
   "/users/:userId/ratings/:levelId",
   validateRequest({

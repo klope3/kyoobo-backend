@@ -1,0 +1,7 @@
+express
+-If the GET user endpoint ever returns sensitive user info, it will require authorization.
+-Allow searching, pagination, filtering, etc. in GET levels endpoint
+-get completions for specific user
+-get ratings for level
+-get all ratings for specific user
+-in the response for the POST level completion endpoint, include information about how the completion stacks up against those of other users (isUserFastest, isFastestEver, isUserLeastLivesLost, etc.)

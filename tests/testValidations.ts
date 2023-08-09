@@ -47,3 +47,8 @@ export function validateLevelDataJson(json: any) {
 export function validateLevelCompletionJson(json: any) {
   return levelCompletionSchema.safeParse(json).success;
 }
+
+export function validateLevelCompletionArrayJson(json: any) {
+  const schema = z.array(levelCompletionSchema);
+  return schema.safeParse(json).success;
+}

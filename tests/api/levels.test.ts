@@ -2,11 +2,13 @@ import { BAD_REQUEST, FORBIDDEN, NOT_FOUND, OK } from "../../statusCodes";
 import {
   FixturesCommon,
   getCommonFixtures,
+  getLevelCompletionsResponse,
   getLevelResponse,
   postLevelCompletionResponse,
   seedTimeout,
 } from "../testUtils";
 import {
+  validateLevelCompletionArrayJson,
   validateLevelCompletionJson,
   validateLevelDataJson,
   validateLevelResultsJson,
@@ -121,6 +123,27 @@ describe("POST /levels/completions", () => {
       -100
     );
     expect(response.status).toBe(BAD_REQUEST);
+  });
+});
+
+describe("GET /levels/:levelId/completions", () => {
+  let fixtures: FixturesCommon;
+
+  beforeEach(async () => {
+    fixtures = await getCommonFixtures();
+  }, seedTimeout);
+
+  it("should return properly formed JSON when the level is found", async () => {
+    const { testLevel } = fixtures;
+    const response = await getLevelCompletionsResponse(testLevel.id);
+    expect(response.status).toBe(OK);
+    const json = await response.json();
+    expect(validateLevelCompletionArrayJson(json)).toBe(true);
+  });
+
+  it("should return NOT FOUND when the level id is not found", async () => {
+    const response = await getLevelCompletionsResponse(0);
+    expect(response.status).toBe(NOT_FOUND);
   });
 });
 

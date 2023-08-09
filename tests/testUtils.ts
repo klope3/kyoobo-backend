@@ -168,3 +168,11 @@ export function postLevelCompletionResponse(
   };
   return fetch(`${url}/levels/completions`, requestOptions);
 }
+
+export function getLevelCompletionsResponse(levelId: number) {
+  const requestOptions = {
+    method: "GET",
+  };
+
+  return fetch(`${url}/levels/${levelId}/completions`, requestOptions);
+}
