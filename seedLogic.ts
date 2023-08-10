@@ -126,24 +126,32 @@ async function writeDb() {
       gameDuration: 45331,
       levelId: createdLevels[0].id,
       userId: createdTestUsers[0].id,
+      lives: 2,
+      score: 400,
     },
     {
       dateCompleted: new Date(1689932445645),
       gameDuration: 144303,
       levelId: createdLevels[1].id,
       userId: createdTestUsers[0].id,
+      lives: 3,
+      score: 1200,
     },
     {
       dateCompleted: new Date(1684932445645),
       gameDuration: 53411,
       levelId: createdLevels[0].id,
       userId: createdTestUsers[1].id,
+      lives: 1,
+      score: 1300,
     },
     {
       dateCompleted: new Date(1687232445645),
       gameDuration: 64398,
       levelId: createdLevels[1].id,
       userId: createdTestUsers[1].id,
+      lives: 2,
+      score: 2100,
     },
   ];
 
@@ -154,6 +162,8 @@ async function writeDb() {
         gameDuration: completion.gameDuration,
         levelId: completion.levelId,
         userId: completion.userId,
+        lives: completion.lives,
+        score: completion.score,
       },
     });
   }

@@ -52,6 +52,8 @@ describe("GET /levels/:levelId", () => {
 describe("POST /levels/completions", () => {
   let fixtures: FixturesCommon;
   const time = 12345;
+  const lives = 2;
+  const score = 1600;
 
   beforeEach(async () => {
     fixtures = await getCommonFixtures();
@@ -63,7 +65,9 @@ describe("POST /levels/completions", () => {
       testUser.id,
       testLevel.id,
       testUser.token,
-      time
+      time,
+      lives,
+      score
     );
     expect(response.status).toBe(OK);
     const json = await response.json();
@@ -76,7 +80,9 @@ describe("POST /levels/completions", () => {
       0,
       testLevel.id,
       testUser.token,
-      time
+      time,
+      lives,
+      score
     );
     expect(response.status).toBe(NOT_FOUND);
   });
@@ -87,7 +93,9 @@ describe("POST /levels/completions", () => {
       testUser.id,
       0,
       testUser.token,
-      time
+      time,
+      lives,
+      score
     );
     expect(response.status).toBe(NOT_FOUND);
   });
@@ -98,7 +106,9 @@ describe("POST /levels/completions", () => {
       testUser.id,
       testLevel.id,
       "",
-      time
+      time,
+      lives,
+      score
     );
     expect(response.status).toBe(BAD_REQUEST);
   });
@@ -109,7 +119,9 @@ describe("POST /levels/completions", () => {
       testUser.id + 1,
       testLevel.id,
       testUser.token,
-      time
+      time,
+      lives,
+      score
     );
     expect(response.status).toBe(FORBIDDEN);
   });
@@ -120,7 +132,9 @@ describe("POST /levels/completions", () => {
       testUser.id,
       testLevel.id,
       testUser.token,
-      -100
+      -100,
+      lives,
+      score
     );
     expect(response.status).toBe(BAD_REQUEST);
   });

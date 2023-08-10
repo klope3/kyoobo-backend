@@ -58,6 +58,8 @@ model LevelCompletion {
   levelId       Int
   dateCompleted DateTime
   gameDuration  Int
+  lives         Int
+  score         Int
 }
 
 model LevelTile {

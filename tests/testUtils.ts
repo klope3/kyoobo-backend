@@ -153,13 +153,17 @@ export function postLevelCompletionResponse(
   userId: number,
   levelId: number,
   token: string,
-  completionTime: number
+  completionTime: number,
+  lives: number,
+  score: number
 ) {
   const headers = createAuthHeaders(token, true);
   const body = JSON.stringify({
     userId,
     levelId,
     completionTime,
+    lives,
+    score,
   });
   const requestOptions = {
     method: "POST",

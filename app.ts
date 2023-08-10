@@ -289,10 +289,12 @@ app.post(
       userId: z.number().int(),
       levelId: z.number().int(),
       completionTime: z.number().int(),
+      lives: z.number().int(),
+      score: z.number().int(),
     }),
   }),
   async (req, res) => {
-    const { completionTime, levelId, userId } = req.body;
+    const { completionTime, levelId, userId, lives, score } = req.body;
 
     const levelWithId = await prisma.level.findUnique({
       where: {
@@ -328,6 +330,8 @@ app.post(
         gameDuration: completionTime,
         userId,
         levelId,
+        lives,
+        score,
       },
       include: {
         user: {
