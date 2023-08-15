@@ -25,6 +25,8 @@ export const testUsers: (Omit<User, "id" | "passwordHash"> & {password: string})
   }
 ]
 
+const levelDescription = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec viverra orci id interdum tempus. Ut commodo vitae mi et rutrum. Donec vel egestas erat, vitae faucibus libero. Phasellus rutrum est vitae urna rutrum, vitae suscipit quam blandit. Mauris sit amet sagittis augue. Sed gravida semper erat et accumsan. Mauris vestibulum, orci et dictum condimentum, est eros dapibus leo, at pulvinar orci massa id metus. Vestibulum pulvinar enim vel est convallis sollicitudin. Donec viverra lacinia cursus. Donec et nisl ac augue tristique laoreet vitae et neque.";
+
 const solidDigit = 1, playerDigit = 2, enemyDigit = 3, pickupDigit = 4, goalDigit = 5;
 
 const testMap1 = [
@@ -119,7 +121,7 @@ type OtherLevelData = {
 export const testLevels: (Omit<Level, "id" | "userId"> & OtherLevelData)[] = [
   {
     title: "My Cool Level",
-    description: "This is a test level.",
+    description: levelDescription,
     goalPositionX: testMap1Interpreted.goalPositionX,
     goalPositionY: testMap1Interpreted.goalPositionY,
     playerPositionX: testMap1Interpreted.playerPositionX,
@@ -133,7 +135,7 @@ export const testLevels: (Omit<Level, "id" | "userId"> & OtherLevelData)[] = [
   },
   {
     title: "My Rad Level",
-    description: "This is a test level.",
+    description: levelDescription,
     goalPositionX: testMap2Interpreted.goalPositionX,
     goalPositionY: testMap2Interpreted.goalPositionY,
     playerPositionX: testMap2Interpreted.playerPositionX,
@@ -147,7 +149,7 @@ export const testLevels: (Omit<Level, "id" | "userId"> & OtherLevelData)[] = [
   },
   {
     title: "My First Level",
-    description: "This is a test level.",
+    description: levelDescription,
     goalPositionX: testMap3Interpreted.goalPositionX,
     goalPositionY: testMap3Interpreted.goalPositionY,
     playerPositionX: testMap3Interpreted.playerPositionX,
