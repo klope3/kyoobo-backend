@@ -7,7 +7,21 @@ import { usersRouter } from "./routes/users";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+const allowedOrigins = ["https://kyoobo.vercel.app/"];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: "GET,PUT,POST,DELETE",
+    allowedHeaders: "Content-Type, Authorization",
+  })
+);
 
 app.use("/", authRouter);
 app.use("/users", usersRouter);
