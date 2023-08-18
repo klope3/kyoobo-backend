@@ -8,7 +8,7 @@ import { usersRouter } from "./routes/users";
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = ["https://kyoobo.vercel.app/"];
+const allowedOrigins = ["https://kyoobo.vercel.app"];
 app.use(
   cors({
     origin: (origin, callback) => {
