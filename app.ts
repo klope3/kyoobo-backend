@@ -7,7 +7,7 @@ import { usersRouter } from "./routes/users";
 const app = express();
 const allowedOrigins = [
   "https://kyoobo.vercel.app",
-  "https://kyoobo-kezuqf5ix-klope3.vercel.app/",
+  "https://kyoobo-kezuqf5ix-klope3.vercel.app",
 ];
 app.use((req, res, next) => {
   const origin = req.headers.origin;
