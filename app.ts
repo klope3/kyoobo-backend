@@ -19,4 +19,5 @@ app.use("/users", usersRouter);
 app.use("/levels", levelsRouter);
 app.use("/ratings", ratingsRouter);
 
-app.listen(3000);
+const port = process.env.PORT;
+app.listen(port || 3000);
