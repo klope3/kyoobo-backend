@@ -6,22 +6,13 @@ import { ratingsRouter } from "./routes/ratings";
 import { usersRouter } from "./routes/users";
 
 const app = express();
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://kyoobo.vercel.app");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 app.use(express.json());
-
-const allowedOrigins = ["https://kyoobo.vercel.app"];
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: "GET,PUT,POST,DELETE",
-    allowedHeaders: "Content-Type, Authorization",
-  })
-);
 
 app.use("/", authRouter);
 app.use("/users", usersRouter);
